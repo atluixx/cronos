@@ -1,0 +1,129 @@
+{
+  "app": {
+    "title": "Cronos",
+    "tagline": "Agendamento de mensagens no WhatsApp — apenas para grupos"
+  },
+  "auth": {
+    "email": "E-mail",
+    "password": "Senha",
+    "login": "Entrar",
+    "register": "Criar conta",
+    "needAccount": "Não tem conta? Cadastre-se",
+    "haveAccount": "Já tem conta? Entrar",
+    "logout": "Sair"
+  },
+  "nav": {
+    "scheduledMessages": "Mensagens agendadas",
+    "templates": "Modelos",
+    "back": "Voltar",
+    "backToDashboard": "Voltar ao painel"
+  },
+  "status": {
+    "AWAITING_LINK": "Não vinculado",
+    "AWAITING_SCAN": "Aguardando leitura do QR…",
+    "AWAITING_CODE": "Digite o código de pareamento…",
+    "CONNECTED": "Conectado",
+    "DISCONNECTED": "Reconectando…",
+    "EXPIRED": "Precisa vincular novamente",
+    "REMOVED": "Removido"
+  },
+  "dashboard": {
+    "title": "Números vinculados",
+    "labelPlaceholder": "Nome, ex.: Telefone de vendas",
+    "addNumber": "Adicionar número",
+    "viewGroups": "Ver grupos",
+    "link": "Vincular",
+    "unlink": "Desvincular",
+    "unlinkConfirmTitle": "Desvincular este número?",
+    "unlinkConfirmBody": "Isso desconecta o dispositivo do WhatsApp e remove os grupos em cache. Mensagens agendadas e registros de envio anteriores são mantidos para seu histórico.",
+    "confirm": "Desvincular",
+    "cancel": "Cancelar",
+    "noStatsYet": "Nenhuma atividade ainda",
+    "onboardingTitle": "Agende sua primeira mensagem",
+    "onboardingSubtitle": "Quatro passos entre um número novo e uma mensagem no piloto automático.",
+    "step1Title": "Conecte um número",
+    "step1Body": "Dê um nome e adicione abaixo — cada número tem sua própria sessão isolada do WhatsApp.",
+    "step2Title": "Escaneie ou pareie",
+    "step2Body": "Vincule com um código QR ou um código de pareamento por telefone, o que for mais fácil.",
+    "step3Title": "Selecione os grupos",
+    "step3Body": "Escolha os grupos do WhatsApp para enviar — contatos individuais nunca são uma opção.",
+    "step4Title": "Agende",
+    "step4Body": "Escreva sua mensagem, defina um horário (ou recorrência) e o Cronos envia por você.",
+    "featureGroupsOnlyTitle": "Somente grupos, garantido",
+    "featureGroupsOnlyBody": "Sem DMs acidentais — o próprio esquema só permite grupos como destino.",
+    "featureReliableTitle": "Agendamento confiável",
+    "featureReliableBody": "As tarefas sobrevivem a reinícios e reconectam automaticamente se uma sessão cair.",
+    "featureMultiNumberTitle": "Vários números",
+    "featureMultiNumberBody": "Vincule quantos números de WhatsApp precisar, cada um independente."
+  },
+  "link": {
+    "addTitle": "Adicionar número",
+    "qrTab": "Código QR",
+    "pairingTab": "Usar código de pareamento",
+    "waitingForQr": "Gerando código QR…",
+    "scanInstructions": "Abra o WhatsApp → Aparelhos conectados → Conectar um aparelho e escaneie este código.",
+    "phoneNumberPlaceholder": "Número de telefone, apenas dígitos (com código do país)",
+    "requestCode": "Solicitar código",
+    "enterCodeInstructions": "Abra o WhatsApp → Aparelhos conectados → Conectar com número de telefone e digite este código:"
+  },
+  "stats": {
+    "totalSent": "Total enviado",
+    "sentThisWeek": "Enviado esta semana",
+    "sentThisMonth": "Enviado este mês",
+    "failed": "Falhas",
+    "groups": "Grupos",
+    "lastActivity": "Última atividade",
+    "never": "Nunca"
+  },
+  "groups": {
+    "title": "Grupos",
+    "refresh": "Atualizar grupos",
+    "refreshing": "Atualizando…",
+    "name": "Nome",
+    "participants": "Participantes",
+    "lastSynced": "Última sincronização",
+    "selectedCount": "{{count}} grupo selecionado",
+    "selectedCount_other": "{{count}} grupos selecionados"
+  },
+  "composer": {
+    "title": "Compor e agendar",
+    "useTemplate": "Usar um modelo…",
+    "messagePlaceholder": "Texto da mensagem",
+    "sendAt": "Enviar em",
+    "recurrence": "Recorrência",
+    "oneTime": "Uma vez",
+    "daily": "Diariamente",
+    "weekly": "Semanalmente",
+    "schedule": "Agendar mensagem",
+    "selectGroupError": "Selecione ao menos um grupo",
+    "textOrMediaError": "Adicione texto e/ou um arquivo de mídia",
+    "scheduled": "Agendado."
+  },
+  "schedule": {
+    "title": "Mensagens agendadas",
+    "sendAt": "Enviar em",
+    "recurrence": "Recorrência",
+    "message": "Mensagem",
+    "groups": "Grupos",
+    "status": "Status",
+    "cancel": "Cancelar",
+    "cancelConfirm": "Cancelar esta mensagem agendada?",
+    "noAttempts": "Nenhuma tentativa de envio ainda."
+  },
+  "templates": {
+    "title": "Modelos de mensagem",
+    "new": "Novo modelo",
+    "name": "Nome",
+    "namePlaceholder": "Nome do modelo",
+    "body": "Corpo",
+    "bodyPlaceholder": "Escreva sua mensagem… aceita *negrito*, _itálico_, ~tachado~, ```monoespaçado```, listas com -",
+    "tags": "Tags",
+    "addTagPlaceholder": "Adicione uma tag e pressione Enter",
+    "preview": "Pré-visualização",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "deleteConfirm": "Excluir este modelo?",
+    "empty": "Nenhum modelo ainda. Crie um para reutilizar ao agendar mensagens.",
+    "filterByTag": "Todas as tags"
+  }
+}

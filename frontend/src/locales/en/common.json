@@ -1,0 +1,129 @@
+{
+  "app": {
+    "title": "Cronos",
+    "tagline": "WhatsApp scheduled messaging — group sends only"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "login": "Log in",
+    "register": "Create account",
+    "needAccount": "Need an account? Register",
+    "haveAccount": "Have an account? Log in",
+    "logout": "Log out"
+  },
+  "nav": {
+    "scheduledMessages": "Scheduled messages",
+    "templates": "Templates",
+    "back": "Back",
+    "backToDashboard": "Back to dashboard"
+  },
+  "status": {
+    "AWAITING_LINK": "Not linked",
+    "AWAITING_SCAN": "Scan QR…",
+    "AWAITING_CODE": "Enter pairing code…",
+    "CONNECTED": "Connected",
+    "DISCONNECTED": "Reconnecting…",
+    "EXPIRED": "Needs re-link",
+    "REMOVED": "Removed"
+  },
+  "dashboard": {
+    "title": "Linked numbers",
+    "labelPlaceholder": "Label, e.g. Sales phone",
+    "addNumber": "Add number",
+    "viewGroups": "View groups",
+    "link": "Link",
+    "unlink": "Unlink",
+    "unlinkConfirmTitle": "Unlink this number?",
+    "unlinkConfirmBody": "This logs the device out of WhatsApp and removes its cached groups. Past scheduled messages and send logs are kept for your records.",
+    "confirm": "Unlink",
+    "cancel": "Cancel",
+    "noStatsYet": "No activity yet",
+    "onboardingTitle": "Schedule your first message",
+    "onboardingSubtitle": "Four steps from a fresh number to a message on autopilot.",
+    "step1Title": "Connect a number",
+    "step1Body": "Give it a label and add it below — each number gets its own isolated WhatsApp session.",
+    "step2Title": "Scan or pair",
+    "step2Body": "Link it with a QR code or a phone-number pairing code, whichever's easier.",
+    "step3Title": "Select groups",
+    "step3Body": "Pick the WhatsApp groups to send to — individual contacts are never an option.",
+    "step4Title": "Schedule",
+    "step4Body": "Write your message, set a time (or a recurrence), and Cronos sends it for you.",
+    "featureGroupsOnlyTitle": "Groups only, enforced",
+    "featureGroupsOnlyBody": "No accidental DMs — the schema itself only allows group targets.",
+    "featureReliableTitle": "Reliable scheduling",
+    "featureReliableBody": "Jobs survive restarts and reconnect automatically if a session drops.",
+    "featureMultiNumberTitle": "Multiple numbers",
+    "featureMultiNumberBody": "Link as many WhatsApp numbers as you manage, each independent."
+  },
+  "link": {
+    "addTitle": "Add a number",
+    "qrTab": "QR code",
+    "pairingTab": "Use pairing code instead",
+    "waitingForQr": "Generating QR code…",
+    "scanInstructions": "Open WhatsApp → Linked devices → Link a device, then scan this code.",
+    "phoneNumberPlaceholder": "Phone number, digits only (country code first)",
+    "requestCode": "Request code",
+    "enterCodeInstructions": "Open WhatsApp → Linked devices → Link with phone number, then enter this code:"
+  },
+  "stats": {
+    "totalSent": "Total sent",
+    "sentThisWeek": "Sent this week",
+    "sentThisMonth": "Sent this month",
+    "failed": "Failed",
+    "groups": "Groups",
+    "lastActivity": "Last activity",
+    "never": "Never"
+  },
+  "groups": {
+    "title": "Groups",
+    "refresh": "Refresh groups",
+    "refreshing": "Refreshing…",
+    "name": "Name",
+    "participants": "Participants",
+    "lastSynced": "Last synced",
+    "selectedCount": "{{count}} group selected",
+    "selectedCount_other": "{{count}} groups selected"
+  },
+  "composer": {
+    "title": "Compose & schedule",
+    "useTemplate": "Use a template…",
+    "messagePlaceholder": "Message text",
+    "sendAt": "Send at",
+    "recurrence": "Recurrence",
+    "oneTime": "One-time",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "schedule": "Schedule message",
+    "selectGroupError": "Select at least one group",
+    "textOrMediaError": "Add text and/or a media file",
+    "scheduled": "Scheduled."
+  },
+  "schedule": {
+    "title": "Scheduled messages",
+    "sendAt": "Send at",
+    "recurrence": "Recurrence",
+    "message": "Message",
+    "groups": "Groups",
+    "status": "Status",
+    "cancel": "Cancel",
+    "cancelConfirm": "Cancel this scheduled message?",
+    "noAttempts": "No send attempts yet."
+  },
+  "templates": {
+    "title": "Message templates",
+    "new": "New template",
+    "name": "Name",
+    "namePlaceholder": "Template name",
+    "body": "Body",
+    "bodyPlaceholder": "Write your message… supports *bold*, _italic_, ~strikethrough~, ```monospace```, - lists",
+    "tags": "Tags",
+    "addTagPlaceholder": "Add a tag and press Enter",
+    "preview": "Preview",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this template?",
+    "empty": "No templates yet. Create one to reuse it when scheduling messages.",
+    "filterByTag": "All tags"
+  }
+}
