@@ -1,0 +1,8 @@
+node_modules
+dist
+public
+*.db
+*.db-journal
+media/*
+!media/.gitkeep
+.env
