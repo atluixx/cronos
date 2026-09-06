@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String             @id @default(cuid())
+  email        String             @unique
+  passwordHash String
+  createdAt    DateTime           @default(now())
+  sessions     WhatsAppSession[]
+  templates    MessageTemplate[]
+}
+
+model WhatsAppSession {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id])
+  label             String
+  phoneNumber       String?
+  status            SessionStatus      @default(AWAITING_LINK)
+  authState         Json? // Baileys creds+keys
+  lastConnectedAt   DateTime?
+  createdAt         DateTime           @default(now())
+  removedAt         DateTime? // soft-delete: unlinked, but history (groups/schedules/logs) is preserved
+  groups            Group[]
+  scheduledMessages ScheduledMessage[]
+
+  @@index([userId])
+}
+
+enum SessionStatus {
+  AWAITING_LINK
+  AWAITING_SCAN
+  AWAITING_CODE
+  CONNECTED
+  DISCONNECTED
+  EXPIRED
+  REMOVED
+}
+
+model Group {
+  id               String          @id @default(cuid())
+  sessionId        String
+  session          WhatsAppSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  whatsappGroupId  String
+  name             String
+  participantCount Int
+  cachedMetadata   Json // Baileys group metadata, for cachedGroupMetadata()
+  lastSyncedAt     DateTime        @default(now())
+  targets          MessageTarget[]
+  sendLogs         SendLog[]
+
+  @@unique([sessionId, whatsappGroupId])
+}
+
+model ScheduledMessage {
+  id         String          @id @default(cuid())
+  userId     String
+  sessionId  String
+  session    WhatsAppSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  text       String?
+  mediaPath  String?
+  mediaType  MediaType?
+  recurrence String? // null = one-time; else e.g. "DAILY" / "WEEKLY:MON,WED"
+  sendAt     DateTime
+  status     ScheduleStatus  @default(PENDING)
+  bullJobId  String?
+  targets    MessageTarget[]
+  logs       SendLog[]
+  createdAt  DateTime        @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+enum MediaType {
+  IMAGE
+  DOCUMENT
+}
+
+enum ScheduleStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  PARTIAL
+  ACTIVE
+  CANCELLED
+}
+
+model MessageTarget {
+  id                 String           @id @default(cuid())
+  scheduledMessageId String
+  scheduledMessage   ScheduledMessage @relation(fields: [scheduledMessageId], references: [id], onDelete: Cascade)
+  groupId            String
+  group              Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduledMessageId, groupId])
+}
+
+model SendLog {
+  id                 String           @id @default(cuid())
+  scheduledMessageId String
+  scheduledMessage   ScheduledMessage @relation(fields: [scheduledMessageId], references: [id], onDelete: Cascade)
+  groupId            String
+  group              Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  attemptedAt        DateTime         @default(now())
+  success            Boolean
+  errorMessage       String?
+
+  @@index([scheduledMessageId])
+}
+
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  body      String
+  tags      Json // string[] — SQLite has no native array column
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
