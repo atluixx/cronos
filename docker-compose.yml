@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "file:/app/data/dev.db"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "${JWT_SECRET:?set JWT_SECRET in a .env file before running}"
+      MEDIA_DIR: "/app/media"
+      PORT: "4000"
+    volumes:
+      - app-data:/app/data
+      - app-media:/app/media
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:
+  app-data:
+  app-media:
