@@ -14,11 +14,13 @@ void i18n
     },
     ns: ["common"],
     defaultNS: "common",
-    fallbackLng: "en",
+    fallbackLng: "pt-BR",
     supportedLngs: ["en", "pt-BR"],
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      // Portuguese is the product's default audience — only an explicit
+      // in-app language switch (cached to localStorage) should override it.
+      order: ["localStorage"],
       lookupLocalStorage: "language",
       caches: ["localStorage"],
     },

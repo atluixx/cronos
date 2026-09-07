@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { signToken } from "../middleware/auth.js";
+import { fail, failValidation } from "../lib/errors.js";
 
 export const authRouter = Router();
 
@@ -14,14 +15,14 @@ const credentialsSchema = z.object({
 authRouter.post("/register", async (req, res) => {
   const parsed = credentialsSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    failValidation(res, parsed.error.flatten());
     return;
   }
   const { email, password } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    res.status(409).json({ error: "Email already registered" });
+    fail(res, 409, "email_taken", "Email already registered");
     return;
   }
 
@@ -33,14 +34,14 @@ authRouter.post("/register", async (req, res) => {
 authRouter.post("/login", async (req, res) => {
   const parsed = credentialsSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    failValidation(res, parsed.error.flatten());
     return;
   }
   const { email, password } = parsed.data;
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-    res.status(401).json({ error: "Invalid credentials" });
+    fail(res, 401, "invalid_credentials", "Invalid credentials");
     return;
   }
 

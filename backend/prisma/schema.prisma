@@ -117,14 +117,16 @@ model SendLog {
 }
 
 model MessageTemplate {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
   name      String
   body      String
   tags      Json // string[] — SQLite has no native array column
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  mediaPath String?
+  mediaType MediaType?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@index([userId])
 }

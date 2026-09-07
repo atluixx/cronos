@@ -5,9 +5,18 @@ import type { AuthedRequest } from "../middleware/auth.js";
 import { requireAuth } from "../middleware/auth.js";
 import { registerJob, unregisterJob } from "../scheduler/registerJob.js";
 import { isValidSendAt } from "../scheduler/validation.js";
+import { fail, failValidation } from "../lib/errors.js";
 
 export const scheduledMessagesRouter = Router();
 scheduledMessagesRouter.use(requireAuth);
+
+class CodedError extends Error {
+  code: string;
+  constructor(code: string, message: string) {
+    super(message);
+    this.code = code;
+  }
+}
 
 const recurrenceSchema = z
   .string()
@@ -26,10 +35,12 @@ const createSchema = z.object({
 
 async function assertGroupsBelongToSession(userId: string, sessionId: string, groupIds: string[]) {
   const session = await prisma.whatsAppSession.findFirst({ where: { id: sessionId, userId } });
-  if (!session) throw new Error("Session not found");
+  if (!session) throw new CodedError("session_not_found", "Session not found");
 
   const groups = await prisma.group.findMany({ where: { id: { in: groupIds }, sessionId } });
-  if (groups.length !== groupIds.length) throw new Error("One or more groups do not belong to this session");
+  if (groups.length !== groupIds.length) {
+    throw new CodedError("invalid_groups", "One or more groups do not belong to this session");
+  }
   return session;
 }
 
@@ -50,24 +61,25 @@ scheduledMessagesRouter.get("/", async (req: AuthedRequest, res) => {
 scheduledMessagesRouter.post("/", async (req: AuthedRequest, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    failValidation(res, parsed.error.flatten());
     return;
   }
   const data = parsed.data;
 
   if (!data.text && !data.mediaPath) {
-    res.status(400).json({ error: "Message must have text and/or media" });
+    fail(res, 400, "message_needs_content", "Message must have text and/or media");
     return;
   }
   if (!isValidSendAt(data.sendAt, data.recurrence)) {
-    res.status(400).json({ error: "sendAt cannot be in the past for a one-time message" });
+    fail(res, 400, "send_at_in_past", "sendAt cannot be in the past for a one-time message");
     return;
   }
 
   try {
     await assertGroupsBelongToSession(req.userId!, data.sessionId, data.groupIds);
   } catch (err) {
-    res.status(400).json({ error: (err as Error).message });
+    const coded = err as CodedError;
+    fail(res, 400, coded.code ?? "action_failed", coded.message);
     return;
   }
 
@@ -104,17 +116,17 @@ const updateSchema = z.object({
 scheduledMessagesRouter.patch("/:id", async (req: AuthedRequest, res) => {
   const existing = await prisma.scheduledMessage.findFirst({ where: { id: req.params.id, userId: req.userId } });
   if (!existing) {
-    res.status(404).json({ error: "Not found" });
+    fail(res, 404, "not_found", "Not found");
     return;
   }
   if (!["PENDING", "ACTIVE"].includes(existing.status)) {
-    res.status(409).json({ error: `Cannot edit a message with status ${existing.status}` });
+    fail(res, 409, "cannot_edit", `Cannot edit a message with status ${existing.status}`);
     return;
   }
 
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    failValidation(res, parsed.error.flatten());
     return;
   }
   const data = parsed.data;
@@ -123,7 +135,8 @@ scheduledMessagesRouter.patch("/:id", async (req: AuthedRequest, res) => {
     try {
       await assertGroupsBelongToSession(req.userId!, existing.sessionId, data.groupIds);
     } catch (err) {
-      res.status(400).json({ error: (err as Error).message });
+      const coded = err as CodedError;
+      fail(res, 400, coded.code ?? "action_failed", coded.message);
       return;
     }
     await prisma.messageTarget.deleteMany({ where: { scheduledMessageId: existing.id } });
@@ -136,7 +149,7 @@ scheduledMessagesRouter.patch("/:id", async (req: AuthedRequest, res) => {
   const sendAt = data.sendAt ?? existing.sendAt;
 
   if (!isValidSendAt(sendAt, recurrence)) {
-    res.status(400).json({ error: "sendAt cannot be in the past for a one-time message" });
+    fail(res, 400, "send_at_in_past", "sendAt cannot be in the past for a one-time message");
     return;
   }
 
@@ -162,7 +175,7 @@ scheduledMessagesRouter.patch("/:id", async (req: AuthedRequest, res) => {
 scheduledMessagesRouter.delete("/:id", async (req: AuthedRequest, res) => {
   const existing = await prisma.scheduledMessage.findFirst({ where: { id: req.params.id, userId: req.userId } });
   if (!existing) {
-    res.status(404).json({ error: "Not found" });
+    fail(res, 404, "not_found", "Not found");
     return;
   }
   await unregisterJob(existing);
@@ -173,7 +186,7 @@ scheduledMessagesRouter.delete("/:id", async (req: AuthedRequest, res) => {
 scheduledMessagesRouter.get("/:id/logs", async (req: AuthedRequest, res) => {
   const existing = await prisma.scheduledMessage.findFirst({ where: { id: req.params.id, userId: req.userId } });
   if (!existing) {
-    res.status(404).json({ error: "Not found" });
+    fail(res, 404, "not_found", "Not found");
     return;
   }
   const logs = await prisma.sendLog.findMany({

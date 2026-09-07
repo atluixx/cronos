@@ -1,0 +1,29 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+env:
+  VPS_HOST: 5.75.181.16
+  VPS_USER: root
+  VPS_PATH: /opt/cronos
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ env.VPS_PATH }}
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose build
+            docker compose up -d
+            docker image prune -f

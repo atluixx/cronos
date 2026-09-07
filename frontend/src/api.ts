@@ -1,5 +1,16 @@
 const BASE = "/api";
 
+// Carries the backend's stable error `code` (e.g. "invalid_credentials")
+// alongside the human message, so the UI can render a localized string
+// instead of whatever language the backend happens to write messages in.
+export class ApiError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
 function getToken(): string | null {
   return localStorage.getItem("token");
 }
@@ -31,7 +42,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const body = await res.json().catch(() => undefined);
   if (!res.ok) {
-    throw new Error(typeof body?.error === "string" ? body.error : JSON.stringify(body?.error) || res.statusText);
+    const message = typeof body?.error === "string" ? body.error : JSON.stringify(body?.error) || res.statusText;
+    throw new ApiError(message, typeof body?.code === "string" ? body.code : undefined);
   }
   return body as T;
 }
@@ -59,8 +71,14 @@ export interface MessageTemplate {
   name: string;
   body: string;
   tags: string[];
+  mediaPath: string | null;
+  mediaType: "IMAGE" | "DOCUMENT" | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export function mediaUrl(mediaPath: string): string {
+  return `/${mediaPath.replace(/^\/+/, "")}`;
 }
 
 export interface Group {
@@ -84,6 +102,19 @@ export interface ScheduledMessage {
   createdAt: string;
 }
 
+export interface DailyMetric {
+  date: string;
+  sent: number;
+  failed: number;
+}
+
+export interface TopGroup {
+  groupId: string;
+  name: string;
+  participantCount: number | null;
+  sent: number;
+}
+
 export interface SendLog {
   id: string;
   groupId: string;
@@ -101,6 +132,8 @@ export const api = {
 
   listSessions: () => request<Session[]>("/sessions"),
   createSession: (label: string) => request<Session>("/sessions", { method: "POST", body: JSON.stringify({ label }) }),
+  renameSession: (id: string, label: string) =>
+    request<Session>(`/sessions/${id}`, { method: "PATCH", body: JSON.stringify({ label }) }),
   deleteSession: (id: string) => request<void>(`/sessions/${id}`, { method: "DELETE" }),
   linkQr: (id: string) => request<{ status: string }>(`/sessions/${id}/link/qr`, { method: "POST" }),
   linkPairing: (id: string, phoneNumber: string) =>
@@ -112,6 +145,11 @@ export const api = {
   listGroups: (sessionId: string) => request<Group[]>(`/sessions/${sessionId}/groups`),
   refreshGroups: (sessionId: string) => request<Group[]>(`/sessions/${sessionId}/groups/refresh`, { method: "POST" }),
   getSessionStats: (sessionId: string) => request<SessionStats>(`/sessions/${sessionId}/stats`),
+
+  getDailyMetrics: (range: { from: string; to: string }) =>
+    request<DailyMetric[]>(`/metrics/daily?from=${range.from}&to=${range.to}`),
+  getFirstActivity: () => request<{ date: string | null }>("/metrics/first-activity"),
+  getTopGroups: (limit = 5) => request<TopGroup[]>(`/metrics/top-groups?limit=${limit}`),
 
   listScheduledMessages: (params: { status?: string; sessionId?: string } = {}) => {
     const qs = new URLSearchParams(params as Record<string, string>).toString();
@@ -137,9 +175,22 @@ export const api = {
 
   listTemplates: () => request<MessageTemplate[]>("/templates"),
   listTemplateTags: () => request<string[]>("/templates/tags"),
-  createTemplate: (data: { name: string; body: string; tags: string[] }) =>
-    request<MessageTemplate>("/templates", { method: "POST", body: JSON.stringify(data) }),
-  updateTemplate: (id: string, data: Partial<{ name: string; body: string; tags: string[] }>) =>
-    request<MessageTemplate>(`/templates/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  createTemplate: (data: {
+    name: string;
+    body: string;
+    tags: string[];
+    mediaPath?: string | null;
+    mediaType?: "IMAGE" | "DOCUMENT" | null;
+  }) => request<MessageTemplate>("/templates", { method: "POST", body: JSON.stringify(data) }),
+  updateTemplate: (
+    id: string,
+    data: Partial<{
+      name: string;
+      body: string;
+      tags: string[];
+      mediaPath: string | null;
+      mediaType: "IMAGE" | "DOCUMENT" | null;
+    }>,
+  ) => request<MessageTemplate>(`/templates/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteTemplate: (id: string) => request<void>(`/templates/${id}`, { method: "DELETE" }),
 };

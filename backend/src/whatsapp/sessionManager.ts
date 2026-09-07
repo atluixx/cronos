@@ -194,6 +194,34 @@ export async function refreshGroups(sessionId: string) {
   return prisma.group.findMany({ where: { sessionId } });
 }
 
+// Restores every previously-linked session's Baileys socket on server boot.
+// Without this, a restart drops the in-memory connection but leaves the DB
+// status looking "CONNECTED" (stale) with nothing actually listening — the
+// dashboard's "reconnects automatically" promise otherwise only applies to
+// scheduled jobs, not the WhatsApp session itself.
+export async function reconcileWhatsAppSessions(): Promise<number> {
+  const sessions = await prisma.whatsAppSession.findMany({
+    where: {
+      removedAt: null,
+      // These four states are only reachable after at least one link attempt,
+      // meaning real (possibly still-valid) auth creds exist to resume from.
+      // AWAITING_LINK (never linked) and EXPIRED (creds cleared) are skipped.
+      status: { in: ["CONNECTED", "DISCONNECTED", "AWAITING_SCAN", "AWAITING_CODE"] },
+    },
+    select: { id: true, userId: true },
+  });
+
+  for (const session of sessions) {
+    try {
+      await startSession(session.id, session.userId, { method: "qr" });
+    } catch (err) {
+      logger.error({ sessionId: session.id, err }, "Failed to restore WhatsApp session on boot");
+    }
+  }
+
+  return sessions.length;
+}
+
 export function isSessionActive(sessionId: string): boolean {
   return activeSessions.has(sessionId);
 }

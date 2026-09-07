@@ -8,8 +8,6 @@ services:
   app:
     build: .
     restart: unless-stopped
-    ports:
-      - "4000:4000"
     environment:
       DATABASE_URL: "file:/app/data/dev.db"
       REDIS_URL: "redis://redis:6379"
@@ -22,7 +20,22 @@ services:
     depends_on:
       - redis
 
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
 volumes:
   redis-data:
   app-data:
   app-media:
+  caddy-data:
+  caddy-config:

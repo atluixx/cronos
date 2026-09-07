@@ -19,34 +19,37 @@ export function SessionStats({ sessionId, refreshKey }: { sessionId: string; ref
   if (!stats) return null;
 
   if (stats.totalSent === 0 && stats.totalFailed === 0) {
-    return <p className="muted stats-empty">{t("dashboard.noStatsYet")}</p>;
+    return <p className="text-muted text-sm my-1">{t("dashboard.noStatsYet")}</p>;
   }
 
+  const dt = "font-mono text-[0.78em] uppercase tracking-[0.04em] text-muted";
+  const dd = "m-0 font-semibold text-[1.2em] tracking-tight";
+
   return (
-    <dl className="stats-grid">
+    <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5 my-1 text-sm">
       <div>
-        <dt>{t("stats.totalSent")}</dt>
-        <dd>{stats.totalSent}</dd>
+        <dt className={dt}>{t("stats.totalSent")}</dt>
+        <dd className={dd}>{stats.totalSent}</dd>
       </div>
       <div>
-        <dt>{t("stats.sentThisWeek")}</dt>
-        <dd>{stats.sentThisWeek}</dd>
+        <dt className={dt}>{t("stats.sentThisWeek")}</dt>
+        <dd className={dd}>{stats.sentThisWeek}</dd>
       </div>
       <div>
-        <dt>{t("stats.sentThisMonth")}</dt>
-        <dd>{stats.sentThisMonth}</dd>
+        <dt className={dt}>{t("stats.sentThisMonth")}</dt>
+        <dd className={dd}>{stats.sentThisMonth}</dd>
       </div>
       <div>
-        <dt>{t("stats.failed")}</dt>
-        <dd className={stats.totalFailed > 0 ? "stat-bad" : undefined}>{stats.totalFailed}</dd>
+        <dt className={dt}>{t("stats.failed")}</dt>
+        <dd className={`${dd} ${stats.totalFailed > 0 ? "text-danger" : ""}`}>{stats.totalFailed}</dd>
       </div>
       <div>
-        <dt>{t("stats.groups")}</dt>
-        <dd>{stats.groupsCount}</dd>
+        <dt className={dt}>{t("stats.groups")}</dt>
+        <dd className={dd}>{stats.groupsCount}</dd>
       </div>
       <div>
-        <dt>{t("stats.lastActivity")}</dt>
-        <dd>{stats.lastActivityAt ? new Date(stats.lastActivityAt).toLocaleString(i18n.language) : t("stats.never")}</dd>
+        <dt className={dt}>{t("stats.lastActivity")}</dt>
+        <dd className={dd}>{stats.lastActivityAt ? new Date(stats.lastActivityAt).toLocaleString(i18n.language) : t("stats.never")}</dd>
       </div>
     </dl>
   );

@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import path from "node:path";
 import { requireAuth } from "../middleware/auth.js";
+import { fail } from "../lib/errors.js";
 
 export const mediaRouter = Router();
 mediaRouter.use(requireAuth);
@@ -30,7 +31,7 @@ const upload = multer({
 
 mediaRouter.post("/", upload.single("file"), (req, res) => {
   if (!req.file) {
-    res.status(400).json({ error: "No file uploaded" });
+    fail(res, 400, "no_file", "No file uploaded");
     return;
   }
   const ext = path.extname(req.file.originalname).toLowerCase();

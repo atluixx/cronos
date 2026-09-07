@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
+import { fail } from "../lib/errors.js";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-change-me";
 
@@ -26,7 +27,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   const token = header?.startsWith("Bearer ") ? header.slice(7) : undefined;
   const userId = token ? verifyToken(token) : null;
   if (!userId) {
-    res.status(401).json({ error: "Unauthorized" });
+    fail(res, 401, "unauthorized", "Unauthorized");
     return;
   }
 
@@ -35,7 +36,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
   // this check, every write for that "user" fails with an opaque FK error.
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
   if (!user) {
-    res.status(401).json({ error: "Unauthorized" });
+    fail(res, 401, "unauthorized", "Unauthorized");
     return;
   }
 

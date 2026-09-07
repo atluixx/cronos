@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api, type ScheduledMessage, type SendLog } from "../api";
 import { useSocket } from "../useSocket";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+
+const STATUS_TEXT: Record<ScheduledMessage["status"], string> = {
+  PENDING: "text-status-warn",
+  ACTIVE: "text-status-good",
+  SENDING: "text-status-info",
+  SENT: "text-status-good",
+  PARTIAL: "text-status-warn",
+  FAILED: "text-danger",
+  CANCELLED: "text-muted",
+};
 
 export function SchedulePage() {
   const { t } = useTranslation();
@@ -43,13 +52,16 @@ export function SchedulePage() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>{t("schedule.title")}</h1>
-        <Link to="/">{t("nav.backToDashboard")}</Link>
+    <>
+      <header className="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <h1 className="text-xl font-medium tracking-tight m-0">{t("schedule.title")}</h1>
       </header>
 
-      <table className="table">
+      {messages.length === 0 && <p className="text-muted text-sm">{t("schedule.empty")}</p>}
+
+      {messages.length > 0 && (
+      <div className="overflow-x-auto">
+      <table className="table min-w-[640px]">
         <thead>
           <tr>
             <th>{t("schedule.sendAt")}</th>
@@ -69,12 +81,12 @@ export function SchedulePage() {
                 <td>{m.text ?? (m.mediaType ? `[${m.mediaType.toLowerCase()}]` : "")}</td>
                 <td>{m.targets.length}</td>
                 <td>
-                  <span className={`badge badge-${m.status.toLowerCase()}`}>{m.status}</span>
+                  <span className={`badge-dot ${STATUS_TEXT[m.status]}`}>{m.status}</span>
                 </td>
                 <td>
                   {(m.status === "PENDING" || m.status === "ACTIVE") && (
                     <button
-                      className="link danger"
+                      className="btn-link-danger"
                       onClick={(e) => {
                         e.stopPropagation();
                         setPendingCancel(m);
@@ -88,9 +100,9 @@ export function SchedulePage() {
               {expanded === m.id && (
                 <tr>
                   <td colSpan={6}>
-                    <ul className="log-list">
+                    <ul className="list-none m-0 p-0">
                       {(logs[m.id] ?? []).map((l) => (
-                        <li key={l.id} className={l.success ? "ok" : "fail"}>
+                        <li key={l.id} className={l.success ? "text-status-good" : "text-danger"}>
                           {l.group.name} — {l.success ? "sent" : `failed: ${l.errorMessage}`} (
                           {new Date(l.attemptedAt).toLocaleString()})
                         </li>
@@ -104,6 +116,8 @@ export function SchedulePage() {
           ))}
         </tbody>
       </table>
+      </div>
+      )}
 
       {pendingCancel && (
         <ConfirmDialog
@@ -115,6 +129,6 @@ export function SchedulePage() {
           onCancel={() => setPendingCancel(null)}
         />
       )}
-    </div>
+    </>
   );
 }

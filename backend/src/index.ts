@@ -13,20 +13,27 @@ import { sessionsRouter } from "./routes/sessions.js";
 import { scheduledMessagesRouter } from "./routes/scheduledMessages.js";
 import { mediaRouter } from "./routes/media.js";
 import { templatesRouter } from "./routes/templates.js";
+import { metricsRouter } from "./routes/metrics.js";
 import { attachWebSocketServer } from "./ws/server.js";
 import { reconcileScheduledJobs } from "./scheduler/reconcile.js";
-import { refreshGroups, isSessionActive } from "./whatsapp/sessionManager.js";
+import { refreshGroups, isSessionActive, reconcileWhatsAppSessions } from "./whatsapp/sessionManager.js";
 import "./scheduler/worker.js"; // starts the BullMQ worker as a side effect
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Uploaded attachments (template previews, composer thumbnails) — filenames
+// are random tokens, not guessable, so unauthenticated static serving is
+// consistent with the rest of this prototype's risk model.
+app.use("/media", express.static(process.env.MEDIA_DIR ?? "./media"));
+
 app.use("/api/auth", authRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/scheduled-messages", scheduledMessagesRouter);
 app.use("/api/media", mediaRouter);
 app.use("/api/templates", templatesRouter);
+app.use("/api/metrics", metricsRouter);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
@@ -76,5 +83,7 @@ const PORT = Number(process.env.PORT ?? 4000);
 server.listen(PORT, async () => {
   logger.info({ port: PORT }, "Server listening");
   await reconcileScheduledJobs();
+  const restored = await reconcileWhatsAppSessions();
+  logger.info({ count: restored }, "Reconciled WhatsApp sessions on boot");
   setInterval(() => void refreshAllConnectedSessionGroups(), GROUP_METADATA_REFRESH_INTERVAL_MS);
 });
