@@ -1,0 +1,11 @@
+node_modules/
+dist/
+public/
+media/*
+*.db
+*.db-journal
+*.tsbuildinfo
+.git/
+Dockerfile
+.dockerignore
+docker-compose.yml
